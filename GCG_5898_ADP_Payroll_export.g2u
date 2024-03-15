@@ -1,0 +1,193 @@
+Program.Sub.ScreenSU.Start
+gui.F_Main..create
+gui.F_Main..caption("ADP Entry")
+gui.F_Main..size(1740,2790)
+gui.F_Main..position(0,0)
+gui.F_Main..event(unload,unload)
+gui.F_Main..alwaysontop(True)
+gui.F_Main..fontname("arial")
+gui.F_Main..fontsize(8)
+gui.F_Main..forecolor(0)
+gui.F_Main..fontstyle(False,False,False,False,False)
+gui.F_Main..BackColor(-2147483633)
+gui.F_Main..controlbox(True)
+gui.F_Main..maxbutton(False)
+gui.F_Main..minbutton(True)
+gui.F_Main..mousepointer(0)
+gui.F_Main..moveable(True)
+gui.F_Main..sizeable(False)
+gui.F_Main..ShowInTaskBar(True)
+gui.F_Main..titlebar(True)
+gui.F_Main.txt1.create(textbox)
+gui.F_Main.txt1.text("")
+gui.F_Main.txt1.visible(True)
+gui.F_Main.txt1.size(1215,315)
+gui.F_Main.txt1.zorder(0)
+gui.F_Main.txt1.position(200,400)
+gui.F_Main.txt1.enabled(True)
+gui.F_Main.txt1.fontname("arial")
+gui.F_Main.txt1.fontsize(8)
+gui.F_Main.txt1.maxLength(3)
+gui.F_Main.txt1.BackColor(-2147483643)
+gui.F_Main.lbl1.create(label)
+gui.F_Main.lbl1.caption("ADP Company")
+gui.F_Main.lbl1.backstyle(0)
+gui.F_Main.lbl1.visible(True)
+gui.F_Main.lbl1.size(1095,255)
+gui.F_Main.lbl1.zorder(1)
+gui.F_Main.lbl1.position(200,200)
+gui.F_Main.lbl1.enabled(True)
+gui.F_Main.lbl1.fontname("arial")
+gui.F_Main.lbl1.fontsize(8)
+gui.F_Main.lbl1.BackColor(-2147483633)
+gui.F_Main.txt2.create(textbox)
+gui.F_Main.txt2.text("")
+gui.F_Main.txt2.visible(True)
+gui.F_Main.txt2.size(1215,315)
+gui.F_Main.txt2.zorder(0)
+gui.F_Main.txt2.position(200,1200)
+gui.F_Main.txt2.enabled(True)
+gui.F_Main.txt2.fontname("arial")
+gui.F_Main.txt2.fontsize(8)
+gui.F_Main.txt2.maxLength(8)
+gui.F_Main.txt2.BackColor(-2147483643)
+gui.F_Main.lbl2.create(label)
+gui.F_Main.lbl2.caption("Batch Number")
+gui.F_Main.lbl2.backstyle(0)
+gui.F_Main.lbl2.visible(True)
+gui.F_Main.lbl2.size(1095,255)
+gui.F_Main.lbl2.zorder(1)
+gui.F_Main.lbl2.position(200,1000)
+gui.F_Main.lbl2.enabled(True)
+gui.F_Main.lbl2.fontname("arial")
+gui.F_Main.lbl2.fontsize(8)
+gui.F_Main.lbl2.BackColor(-2147483633)
+gui.F_Main.cmdExport.create(button)
+gui.F_Main.cmdExport.caption("Export")
+gui.F_Main.cmdExport.visible(True)
+gui.F_Main.cmdExport.size(975,375)
+gui.F_Main.cmdExport.zorder(0)
+gui.F_Main.cmdExport.position(300,1700)
+gui.F_Main.cmdExport.enabled(True)
+gui.F_Main.cmdExport.fontname("arial")
+gui.F_Main.cmdExport.fontsize(8)
+gui.F_Main.cmdExport.event(click,Process)
+
+
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+
+Variable.Global.DSN.Declare(String)
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+'Gui.F_main..Show
+
+f.Intrinsic.Control.CallSub(Process)
+
+Program.Sub.Main.End
+
+Program.Sub.Process.Start
+Variable.local.export.declare(String)
+Variable.local.export.redim(0,6)
+Variable.local.hold.declare(String)
+Variable.local.query.declare(String)
+V.Local.sEmpMst.Declare(String)
+V.Local.ssn.Declare(String)
+Variable.Local.I.declare(Long)
+Variable.local.DIR.declare(String)
+Variable.local.date.declare(String)
+Variable.local.file.declare(Long)
+Variable.local.filename.declare(String)
+Variable.local.sResult.declare(String)
+Variable.Local.time.Declare(String)
+Variable.Local.id.Declare(String)
+V.Local.shold.Declare(String)
+
+Function.Odbc.Connection!Conx.Openconnection(Variable.Ambient.pDSN,Variable.Ambient.PUser,Variable.Ambient.PPass)
+
+Function.Intrinsic.String.Left(Variable.Passed.888888,8,Variable.Local.date)
+Function.Intrinsic.String.Mid(Variable.Passed.888888,9,6,Variable.Local.time)
+Function.Intrinsic.String.Mid(Variable.Passed.888888,15,2,Variable.Local.id)
+Function.Intrinsic.File.Gethandle(Variable.Local.File)
+Function.Intrinsic.String.Concat(Variable.Caller.FilesDir,"\Payroll\DATE",Variable.Local.id,".csv",Variable.Local.Filename)
+'Function.Intrinsic.String.Concat("C:\Payroll\DATE",Variable.Local.id,".csv",Variable.Local.Filename)
+Function.Intrinsic.File.Openforwrite(Variable.Local.Filename,Variable.Local.File)
+
+
+'Function.intrinsic.string.concat("SELECT EMPLOYEE, SEQ, NAME, TYPE, HOURS,EC FROM PYRL_LABOR_XFER","",Variable.Local.query)
+Function.intrinsic.string.concat("SELECT EMPLOYEE,SEQ, NAME, TYPE, HOURS,EC FROM PYRL_LABOR_XFER WHERE RUN_CYMD = '",Variable.Local.date,"' AND RUN_TIME = '",Variable.Local.time,"'",Variable.Local.query)
+Function.Odbc.Connection!Conx.Openrecordsetro("rstX",Variable.Local.query)
+Function.Intrinsic.Control.dountil(Variable.Odbc.Conx!Rstx.Eof,=,True)
+
+	F.Intrinsic.String.Concat("select SOC_SEC_ENC as SSN from EMPLOYEE_MSTR where EMPLOYEE ='",V.ODBC.Conx!rstX.FieldValTrim!EMPLOYEE,"'",V.Local.sEmpMst)
+	F.ODBC.Connection!Conx.OpenRecordsetRO("rstEM",V.Local.sEmpMst)
+		F.Intrinsic.Control.If(V.ODBC.Conx!rstEM.EOF,=,False)
+			F.Global.Encryption.Decrypt(V.ODBC.Conx!rstEM.FieldValTRIM!SSN,V.Local.ssn)
+		F.Intrinsic.Control.EndIf
+	F.ODBC.Conx!rstEM.Close
+
+
+
+	Variable.local.export.redim(0,12)
+
+'	F.Intrinsic.String.LPad(V.Local.hold," ",20,V.Local.export(0))
+'	F.Intrinsic.String.LPad(V.Local.hold," ",15,V.Local.export(1))
+'	F.Intrinsic.String.LPad(V.Local.hold," ",2,V.Local.export(2))
+		V.Local.export(3).Set(V.Local.ssn)
+'	F.Intrinsic.String.LPad(V.Local.hold," ",10,V.Local.export(4))
+'	F.Intrinsic.String.LPad(Variable.Odbc.Conx!Rstx.Fieldval!EMPLOYEE,"0",9,V.Local.export(5))
+'	F.Intrinsic.String.LPad(V.Local.hold," ",1,V.Local.export(6))
+'	F.Intrinsic.String.LPad(V.Local.hold," ",6,V.Local.export(7))
+'	F.Intrinsic.String.LPad(V.Local.hold," ",18,V.Local.export(8))
+'		V.Local.export(5).Set(Variable.Odbc.Conx!Rstx.Fieldval!EMPLOYEE)
+		Variable.local.export(9).set(Variable.Odbc.Conx!Rstx.Fieldval!Hours)
+	F.Intrinsic.String.Format(V.Local.export(9),"0.00",V.Local.export(9))
+'	F.Intrinsic.String.LPad(V.Local.hold," ",1,V.Local.export(10))
+
+	Function.Intrinsic.Control.If(Variable.Odbc.Conx!Rstx.Fieldval!TYPE,=,"RT")
+		V.Local.export(11).Set("01")
+	Function.Intrinsic.Control.elseIf(Variable.Odbc.Conx!Rstx.Fieldval!TYPE,=,"OT")
+		V.Local.export(11).Set("02")
+	Function.Intrinsic.Control.elseIf(Variable.Odbc.Conx!Rstx.Fieldval!TYPE,=,"DT")
+		V.Local.export(11).Set("06")
+	Function.Intrinsic.Control.elseIf(Variable.Odbc.Conx!Rstx.Fieldval!TYPE,=,"HT")
+		V.Local.export(11).Set("04")
+	Function.Intrinsic.Control.else
+		Variable.local.export(11).set(Variable.Odbc.Conx!Rstx.Fieldval!EC)
+	F.Intrinsic.Control.EndIf
+		V.Local.export(12).Set(V.ODBC.Conx!rstX.FieldVal!SEQ)
+		F.Intrinsic.String.Replace(V.Local.export(12),"0","",V.Local.export(12))
+'	F.Intrinsic.String.LPad(V.Local.hold," ",1,V.Local.export(12))
+
+	Variable.local.hold.set("")
+	Function.Intrinsic.Control.For(Variable.Local.I,Variable.Local.export.Lbound,Variable.Local.export.Ubound,1)
+		Function.intrinsic.control.if(Variable.Local.I,=,0)
+			Variable.Local.hold.Set(Variable.Local.export(0))
+		Function.intrinsic.control.elseif(Variable.Local.i,<>,0)
+			Function.intrinsic.string.concat(Variable.Local.hold,",",Variable.Local.export(Variable.Local.I),Variable.Local.hold)
+		Function.intrinsic.control.endif
+	Function.intrinsic.control.next(Variable.Local.I)
+	Function.Intrinsic.File.Writeline(Variable.Local.File,Variable.Local.Hold)
+	Function.Odbc.Conx!Rstx.movenext
+Function.intrinsic.control.loop
+Function.Odbc.Conx!Rstx.Close
+
+Function.Intrinsic.File.Closefile(Variable.Local.File)
+
+
+
+Function.Odbc.Connection!Conx.Close
+Function.Intrinsic.Control.End
+
+
+
+Program.Sub.Process.End
+
+Program.Sub.unload.Start
+Function.Intrinsic.Control.End
+
+Program.Sub.unload.End
+
+
